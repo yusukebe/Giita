@@ -14,3 +14,4 @@ pre.git { font-size:0.8em; }
 .synTodo       { color: #0000FF ; background: #FFFF00 none }
 ul li.dir {  list-style-image: url('http://github.com/yusukebe/giita/raw/master/static/folder.png'); }
 ul li.file {  list-style-image: url('http://github.com/yusukebe/giita/raw/master/static/document.png'); }
+h1, h2, h3, h4, h5 { font-weight: bold; }

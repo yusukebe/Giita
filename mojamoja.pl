@@ -1,35 +1,31 @@
 #!/usr/bin/env perl
-use Plack::Runner;
 use MojaMoja;
 use Path::Class qw/file dir/;
+use Plack::Runner;
+use Plack::Request;
 
-my $app = do {
-    get '/' => sub {
-        my $current = dir('./');
-        my @children = get_dir( $current );
-        make_response( render('dir.mt') );
-    };
-
-    get "/{current}" => sub {
-        my ($req, $args) = @_;
-        my $current = $args->{current};
-        if( -d $current ) {
-            $current = dir( $current );
-            my @children = get_dir( $current );
-            make_response( render('dir.mt') );
-        }else{
-            $current = file( $current );
-            my $file = get_file( $current );
-            make_response( render('file.mt') );
-        }
-    };
-
-    zigorou;
-};
-
+#XXX
 my $runner = Plack::Runner->new;
 $runner->parse_options(@ARGV);
-$runner->run($app);
+$runner->run( sub { app(@_) } );
+
+sub app {
+    my $env = shift;
+    my $req = Plack::Request->new( $env );
+    my $current = $req->path_info;
+    $current =~ s!^/!./!;
+    my $base = $req->base;
+    if ( -d $current ) {
+        $current = dir($current);
+        my @children = get_dir($current);
+        make_response( render('dir.mt') );
+    }
+    else {
+        $current = file($current);
+        my $file = get_file($current);
+        make_response( render('file.mt') );
+    }
+}
 
 sub make_response {
     my $body = shift;
@@ -56,7 +52,7 @@ __DATA__
 <h1><?= $current ?></h1>
 <ul>
 ? for my $obj ( @children ) {
-<li><a href="<?= $obj ?>"><?= $obj ?></a></li>
+<li><a href="<?= $base ?><?= $obj ?>"><?= $obj ?></a></li>
 ? }
 </ul>
 

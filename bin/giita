@@ -10,6 +10,8 @@ use Text::Markdown qw/markdown/;
 use HTML::TreeBuilder::XPath;
 use Git::Class::Cmd;
 
+our $VERSION = '0.01';
+
 my $git_root = dir('.git')->stringify;
 my $git_cmd = Git::Class::Cmd->new( die_on_error => 1 , git_dir => $git_root );
 
@@ -166,6 +168,11 @@ Run on your directory to want to see.
 =head1 AUTHOR
 
 Yusuke Wada
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
 
 =cut
 

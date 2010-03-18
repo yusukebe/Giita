@@ -31,7 +31,7 @@ sub app {
     my $base = $req->base;
 
     if( my $sha = $req->param('diff') ) {
-        my $git_diff = git_diff($sha);
+        my $git_diff = git_diff($sha, 'diff');
         return make_response( render('diff.mt') );
     }
 

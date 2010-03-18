@@ -13,6 +13,9 @@ use Git::Class::Cmd;
 our $VERSION = '0.01';
 
 my $root      = dir('./');
+
+die "Here is not git repository!" unless -d $root->subdir('.git');
+
 my @root_path = split '/', $root->absolute;
 my $root_name = pop @root_path;
 my $git_cmd =

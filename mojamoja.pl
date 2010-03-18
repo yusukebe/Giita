@@ -24,20 +24,20 @@ my $app = do {
         }
     };
 
-    sub make_response {
-        my $body = shift;
-        my $res = res(200);
-        $res->body( $body );
-        $res->content_type('text/html');
-        $res->finalize;
-    }
-
     zigorou;
 };
 
 my $runner = Plack::Runner->new;
 $runner->parse_options(@ARGV);
 $runner->run($app);
+
+sub make_response {
+    my $body = shift;
+    my $res = res(200);
+    $res->body( $body );
+    $res->content_type('text/html');
+    $res->finalize;
+}
 
 sub get_dir {
     my $path = shift;

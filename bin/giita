@@ -140,13 +140,13 @@ sub highlight_pod {
 sub git_log {
     my $path = shift;
     my $log = $git_cmd->git( 'log', $path );
-    return escape( $log );
+    return $log;
 }
 
 sub git_diff {
     my $path = shift;
     my $log = $git_cmd->git( 'diff', $path );
-    return escape( $log );
+    return $log;
 }
 
 sub escape {

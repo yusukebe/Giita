@@ -190,9 +190,13 @@ __DATA__
 <hr class="space" />
 <h1><?= $current ?></h1>
 <hr />
+<div class="span-16">
 ?= Text::MicroTemplate::encoded_string $content
+</div>
+<div class="span-8 last">
 ? for my $log ( @$git_logs ) {
 ?= Text::MicroTemplate::encoded_string $log
 ? }
+</div>
 </div>
 </body>

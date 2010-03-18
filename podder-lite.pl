@@ -146,11 +146,11 @@ podder-lite - Yet another document viewer support perl and pod using "many" CPAN
 
 Run on your directory to want to see.
 
-  $ plackup podder-lite.psgi
+  $ podder-lite.pl
 
 =head1 HOW TO GET
 
-  $ git clone git://gist.github.com/336278.git gist-336278
+  $ git clone git://gist.github.com/336278.git podder-lite
 
 =head1 AUTHOR
 
@@ -162,7 +162,7 @@ __DATA__
 
 @@ dir.mt
 <link rel="stylesheet" href="http://gist.github.com/raw/336278/f542e3051457773bfa4503e283a1a182b0ce7b12/screen.css" type="text/css" media="screen, projection">
-<link rel="stylesheet" href="http://gist.github.com/raw/336278/e8e7b9aa8fffb554b74953c66d7c581b3c4ea903/site.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="https://gist.github.com/raw/336278/fdf7ab297096363df7ba67180ff3b672949f64fc/site.css" type="text/css" media="screen, projection">
 <link rel="stylesheet" href="http://gist.github.com/raw/336278/fdb82208e9920c801638671f92a8fd0b62902464/print.css" type="text/css" media="print">
 <!--[if lt IE 8]><link rel="stylesheet" href="http://gist.github.com/raw/336278/3dddda9451f84f20b5b0b27307f0eac4f1a535fe/ie.css" type="text/css" media="screen, projection"><![endif]-->
 <body>
@@ -182,7 +182,7 @@ __DATA__
 
 @@ file.mt
 <link rel="stylesheet" href="http://gist.github.com/raw/336278/f542e3051457773bfa4503e283a1a182b0ce7b12/screen.css" type="text/css" media="screen, projection">
-<link rel="stylesheet" href="http://gist.github.com/raw/336278/e8e7b9aa8fffb554b74953c66d7c581b3c4ea903/site.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="https://gist.github.com/raw/336278/fdf7ab297096363df7ba67180ff3b672949f64fc/site.css" type="text/css" media="screen, projection">
 <link rel="stylesheet" href="ttp://gist.github.com/raw/336278/fdb82208e9920c801638671f92a8fd0b62902464/print.css" type="text/css" media="print">
 <!--[if lt IE 8]><link rel="stylesheet" href="http://gist.github.com/raw/336278/3dddda9451f84f20b5b0b27307f0eac4f1a535fe/ie.css" type="text/css" media="screen, projection"><![endif]-->
 <body>

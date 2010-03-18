@@ -1,3 +1,5 @@
+#!/usr/bin/perl
+
 use MojaMoja qw/render/;
 use Path::Class qw/file dir/;
 use Plack::Runner;
@@ -9,6 +11,10 @@ use Git::Class::Cmd;
 
 my $git_root = dir('.git')->stringify;
 my $git_cmd = Git::Class::Cmd->new( die_on_error => 1 , git_dir => $git_root );
+
+my $runner = Plack::Runner->new;
+$runner->parse_options(@ARGV);
+$runner->run( sub { app(@_) } );
 
 sub app {
     my $env = shift;
@@ -132,8 +138,6 @@ sub git_diff {
     return $log;
 }
 
-\&app;
-
 =head1 NAME
 
 podder-lite - Yet another document viewer support perl and pod using "many" CPAN modules.
@@ -161,11 +165,6 @@ __DATA__
 <link rel="stylesheet" href="http://gist.github.com/raw/336278/e8e7b9aa8fffb554b74953c66d7c581b3c4ea903/site.css" type="text/css" media="screen, projection">
 <link rel="stylesheet" href="http://gist.github.com/raw/336278/fdb82208e9920c801638671f92a8fd0b62902464/print.css" type="text/css" media="print">
 <!--[if lt IE 8]><link rel="stylesheet" href="http://gist.github.com/raw/336278/3dddda9451f84f20b5b0b27307f0eac4f1a535fe/ie.css" type="text/css" media="screen, projection"><![endif]-->
-<style type="text/css">
-p, li { font-size: 1.2em; }
-pre, pre code { font-family: 'Monaco', monospace; }
-pre { border: 1px solid #ccc; background-color: #eee; border: 1px solid #888; padding: 1em; overflow:auto;}
-</style>
 <body>
 <div class="container">
 <hr class="space" />

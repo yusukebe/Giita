@@ -22,17 +22,17 @@ sub app {
     my $current = $req->path_info;
     $current =~ s!^/!./!;
 
-    if( -B $current ) {
-        my $body = file($current)->slurp;
-        return [200,[ 'Content-Length' => length $body ],[ $body ]];
-    }
-
     my $base = $req->base;
 
     if ( -d $current ) {
         $current = dir($current);
         my ($children, $git_logs) = get_dir($current);
         return make_response( render('dir.mt') );
+    }
+
+    if( -B $current ) {
+        my $body = file($current)->slurp;
+        return [200,[ 'Content-Length' => length $body ],[ $body ]];
     }
 
     if( -f $current ) {

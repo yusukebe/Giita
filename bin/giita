@@ -255,7 +255,7 @@ __DATA__
 <div class="span-16">
 ?= Text::MicroTemplate::encoded_string $content
 </div>
-<div class="span-8 last">
+<div class="span-8 last" style="font-size:0.8em;">
 ? for my $log ( @$git_logs ) {
 <pre class="git">
 ?= Text::MicroTemplate::encoded_string $log

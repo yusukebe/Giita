@@ -9,7 +9,6 @@ use Pod::Simple::XHTML;
 use Text::Markdown qw/markdown/;
 use HTML::TreeBuilder::XPath;
 use Git::Class::Cmd;
-use HTML::Entities qw/decode_entities/;
 
 our $VERSION = '0.01';
 

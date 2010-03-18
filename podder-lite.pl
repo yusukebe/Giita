@@ -17,8 +17,8 @@ $runner->parse_options(@ARGV);
 $runner->run( sub { app(@_) } );
 
 sub app {
-    my $env = shift;
-    my $req = Plack::Request->new( $env );
+    my $env     = shift;
+    my $req     = Plack::Request->new($env);
     my $current = $req->path_info;
     $current =~ s!^/!./!;
 
@@ -26,21 +26,21 @@ sub app {
 
     if ( -d $current ) {
         $current = dir($current);
-        my ($children, $git_logs) = get_dir($current);
+        my ( $children, $git_logs ) = get_dir($current);
         return make_response( render('dir.mt') );
     }
 
-    if( -B $current ) {
+    if ( -B $current ) {
         my $body = file($current)->slurp;
-        return [200,[ 'Content-Length' => length $body ],[ $body ]];
+        return [ 200, [ 'Content-Length' => length $body ], [$body] ];
     }
 
-    if( -f $current ) {
+    if ( -f $current ) {
         $current = file($current);
-        my ($content, $git_logs) = get_file($current);
+        my ( $content, $git_logs ) = get_file($current);
         return make_response( render('file.mt') );
     }
-    return [404,[],['404 Document Not Found']];
+    return [ 404, [], ['404 Document Not Found'] ];
 }
 
 sub make_response {
@@ -56,8 +56,7 @@ sub get_dir {
     $path ||= dir('./');
     my @children = $path->children;
     if( wantarray ){
-        my $git_logs = '<pre class="git">' . highlight( git_show(), 'diff' ) . '</pre>';
-        return (\@children, $git_logs);
+        return (\@children, git_info( $path ) );
     }else{
         return \@children;
     }
@@ -75,13 +74,20 @@ sub get_file {
         $html = '<pre>' . highlight( $text ) . '</pre>';
     }
     if(wantarray){
-        my $git_logs;
-        push @$git_logs, '<pre class="git">' . highlight( git_diff( $path ),'diff' ) . '</pre>';
-        push @$git_logs, '<pre class="git">' . git_log( $path ) . '</pre>';
-        return ( $html, $git_logs );
+        return ( $html, git_info($path) );
     }else{
         return $html;
     }
+}
+
+sub git_info {
+    my $path = shift;
+    my $git_logs;
+    my $git_diff = git_diff( $path );
+    my $git_log = git_log( $path );
+    push @$git_logs, highlight( $git_diff ,'diff' ) if $git_diff;
+    push @$git_logs, $git_log if $git_log;
+    return $git_logs;
 }
 
 sub highlight {
@@ -168,15 +174,28 @@ __DATA__
 <body>
 <div class="container">
 <hr class="space" />
-<h1><?= $current ?></h1>
+<h1>
+? my @path = split '/', $current;
+? unshift @path, '.' if $current ne '.';
+? my $current_path = pop @path;
+? my $path_info = '';
+? for my $p ( @path ) {
+? $path_info .= $p . '/';
+<a href="<?= $base ?><?= $path_info ?>"><?= $p ?></a> /
+? }
+<?= $current_path ?>
+</h1>
 <hr />
 <ul>
 ? for my $obj ( @$children ) {
 <li><a href="<?= $base ?><?= $obj ?>"><?= $obj ?></a></li>
 ? }
 </ul>
-<h2>git info</h2>
-?= Text::MicroTemplate::encoded_string $git_logs
+? for my $log ( @$git_logs ) {
+<pre class="git">
+?= Text::MicroTemplate::encoded_string $log
+</pre>
+? }
 </div>
 </body>
 
@@ -188,14 +207,26 @@ __DATA__
 <body>
 <div class="container">
 <hr class="space" />
-<h1><?= $current ?></h1>
+<h1>
+? my @path = split '/', $current;
+? unshift @path, '.' unless $current =~ m!^./!;
+? my $current_path = pop @path;
+? my $path_info = '';
+? for my $p ( @path ) {
+? $path_info .= $p . '/';
+<a href="<?= $base ?><?= $path_info ?>"><?= $p ?></a> /
+? }
+<?= $current_path ?>
+</h1>
 <hr />
 <div class="span-16">
 ?= Text::MicroTemplate::encoded_string $content
 </div>
 <div class="span-8 last">
 ? for my $log ( @$git_logs ) {
+<pre class="git">
 ?= Text::MicroTemplate::encoded_string $log
+</pre>
 ? }
 </div>
 </div>

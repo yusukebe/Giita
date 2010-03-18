@@ -30,9 +30,9 @@ sub app {
 
     my $base = $req->base;
 
-    if( my $sha = $req->param('diff') ) {
-        my $git_diff = git_diff($sha);
-        return make_response( render('diff.mt') );
+    if( my $sha = $req->param('commit') ) {
+        my $git_commit = git_show($sha);
+        return make_response( render('commit.mt') );
     }
 
     if ( -d $current ) {
@@ -152,7 +152,7 @@ sub git_log {
     $log = escape($log);
     my $html;
     for my $l ( split '\n', $log) {
-        $l =~ s!commit\s([0-9a-z]+)!commit <a href="/?diff=$1">$1</a>!;
+        $l =~ s!commit\s([0-9a-z]+)!commit <a href="/?commit=$1">$1</a>!;
         $html .= $l . "\n";
     }
     return $html;
@@ -161,6 +161,13 @@ sub git_log {
 sub git_diff {
     my $path = shift;
     my $log = $git_cmd->git( 'diff', $path );
+    $log = highlight($log, 'diff') if $log;
+    return $log;
+}
+
+sub git_show {
+    my $sha = shift;
+    my $log = $git_cmd->git( 'show', $sha );
     $log = highlight($log, 'diff') if $log;
     return $log;
 }
@@ -263,11 +270,11 @@ __DATA__
 ? }
 </div>
 
-@@ diff.mt
+@@ commit.mt
 <h1><a href="<?= $base ?>"><?= $root_name ?></a> / <?= $sha ?></h1>
 <hr />
 <pre class="git">
-?= Text::MicroTemplate::encoded_string $git_diff
+?= Text::MicroTemplate::encoded_string $git_commit
 </pre>
 
 @@ head.mt

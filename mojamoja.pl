@@ -4,6 +4,8 @@ use Path::Class qw/file dir/;
 use Plack::Runner;
 use Plack::Request;
 use Text::VimColor;
+use Pod::Simple::XHTML;
+use HTML::TreeBuilder::XPath;
 
 #XXX
 my $runner = Plack::Runner->new;
@@ -45,7 +47,14 @@ sub get_dir {
 sub get_file {
     my $path = shift;
     my $text = $path->slurp;
-    my $html = highlight( $text );
+    my $html;
+    my ($ext) = $path->basename =~ /\.([^\.]+)$/;
+    if( $ext =~ /(?:pm|pl|psgi|pod|t)/i ){
+        $html .= pod( $text );
+        $html .= '<pre class="code">' . highlight( $text ) . '</pre>';
+    }else{
+        $html = highlight( $text );
+    }
     return $html;
 }
 
@@ -58,7 +67,49 @@ sub highlight {
     return $syntax->html;
 }
 
+sub pod {
+    my $text = shift;
+    my $parser = Pod::Simple::XHTML->new();
+    my $html;
+    $parser->output_string( \$html );
+    $parser->html_header('');
+    $parser->html_footer('');
+    $parser->html_h_level(3);
+    $parser->parse_string_document( $text );
+    $html = highlight_pod($html);
+    $html = '<div class="pod">' . $html . '</div>';
+    return $html;
+}
+
+sub highlight_pod {
+    my $html = shift;
+    my $tree = HTML::TreeBuilder::XPath->new;
+    $tree->parse($html);
+    for my $code ( $tree->findnodes('//pre') ) {
+        my $hilight_code = highlight( $code->as_text );
+        my $code_html    = $code->as_HTML;
+        $html =~ s/\Q$code_html\E/<pre>$hilight_code<\/pre>/m;
+    }
+    return $html;
+}
+
 zigorou; #XXX
+
+=head1 NAME
+
+mojamoja(kari) - Yet another document viewer support perl and pod.
+
+=head1 SYNOPSIS
+
+Run your directory to want to see.
+
+  $ ./mojamoja.pl
+
+=head1 AUTHOR
+
+Yusuke Wada
+
+=cut
 
 __DATA__
 
@@ -72,6 +123,8 @@ __DATA__
 
 @@ file.mt
 <style type="text/css">
+pre, pre code { font-family: 'Monaco', monospace; font-size:0.8em; }
+pre { border: 1px solid #ccc; background-color: #eee; border: 1px solid #888; padding: 1em; overflow:auto;}
 .synComment    { color: #0000FF }
 .synConstant   { color: #FF00FF }
 .synIdentifier { color: #008B8B }
@@ -84,6 +137,4 @@ __DATA__
 .synTodo       { color: #0000FF ; background: #FFFF00 none }
 </style>
 <h1><?= $current ?></h1>
-<pre>
 ?= Text::MicroTemplate::encoded_string $html
-</pre>

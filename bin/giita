@@ -192,6 +192,7 @@ __DATA__
 ? my $path_info = '';
 <a href="<?= $base ?>"><?= $root_name ?></a> /
 ? for my $p ( @path ) {
+? next if $p eq '.';
 ? $path_info .= $p . '/';
 <a href="<?= $base ?><?= $path_info ?>">
 <?= $p ?>
@@ -202,7 +203,9 @@ __DATA__
 <hr />
 <ul>
 ? for my $obj ( @$children ) {
-<li><a href="<?= $base ?><?= $obj ?>"><?= $obj ?></a></li>
+? my ($obj_name) = $obj->stringify =~ m!/([^/]+)$!;
+? $obj_name ||= $obj->stringify;
+<li><a href="<?= $base ?><?= $obj ?>"><?= $obj_name ?></a></li>
 ? }
 </ul>
 ? for my $log ( @$git_logs ) {
@@ -220,6 +223,7 @@ __DATA__
 <a href="<?= $base ?>"><?= $root_name ?></a> /
 ? for my $p ( @path ) {
 ? $path_info .= $p . '/';
+? next if $p eq '.';
 <a href="<?= $base ?><?= $path_info ?>"><?= $p ?></a> /
 ? }
 <?= $current_path ?>

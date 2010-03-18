@@ -16,7 +16,7 @@ Depends many CPAN modules.
 
 ## PLAY [演奏する]
 
-> $ ./bin/giita
+> $ giita
 
 ## AUTHOR [作者]
 

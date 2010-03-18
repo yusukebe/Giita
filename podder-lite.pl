@@ -56,7 +56,7 @@ sub get_dir {
     $path ||= dir('./');
     my @children = $path->children;
     if( wantarray ){
-        my $git_logs = git_show();
+        my $git_logs = '<pre class="git">' . highlight( git_show(), 'diff' ) . '</pre>';
         return (\@children, $git_logs);
     }else{
         return \@children;
@@ -76,8 +76,8 @@ sub get_file {
     }
     if(wantarray){
         my $git_logs;
-        push @$git_logs, git_diff( $path );
-        push @$git_logs, git_log( $path );
+        push @$git_logs, '<pre class="git">' . highlight( git_diff( $path ) ) . '</pre>';
+        push @$git_logs, '<pre class="git">' . highlight( git_log( $path ) ) . '</pre>';
         return ( $html, $git_logs );
     }else{
         return $html;
@@ -85,7 +85,8 @@ sub get_file {
 }
 
 sub highlight {
-    my $text = shift;
+    my ($text,$type) = @_;
+    $type ||= 'perl';
     my $syntax = Text::VimColor->new(
         string   => $text,
         filetype => 'perl',
@@ -181,9 +182,7 @@ pre { border: 1px solid #ccc; background-color: #eee; border: 1px solid #888; pa
 ? }
 </ul>
 <h2>git info</h2>
-<pre>
-<?= $git_logs ?>
-</pre>
+?= Text::MicroTemplate::encoded_string $git_logs
 </div>
 </body>
 
@@ -191,21 +190,6 @@ pre { border: 1px solid #ccc; background-color: #eee; border: 1px solid #888; pa
 <link rel="stylesheet" href="http://gist.github.com/raw/336278/f542e3051457773bfa4503e283a1a182b0ce7b12/screen.css" type="text/css" media="screen, projection">
 <link rel="stylesheet" href="http://gist.github.com/raw/336278/fdb82208e9920c801638671f92a8fd0b62902464/print.css" type="text/css" media="print">
 <!--[if lt IE 8]><link rel="stylesheet" href="http://gist.github.com/raw/336278/3dddda9451f84f20b5b0b27307f0eac4f1a535fe/ie.css" type="text/css" media="screen, projection"><![endif]-->
-<style type="text/css">
-p, li { font-size: 1.2em; }
-pre, pre code { font-family: 'Monaco', monospace; }
-pre { border: 1px solid #ccc; background-color: #eee; border: 1px solid #888; padding: 1em; overflow:auto;}
-.synComment    { color: #0000FF }
-.synConstant   { color: #FF00FF }
-.synIdentifier { color: #008B8B }
-.synStatement  { color: #A52A2A ; font-weight: bold }
-.synPreProc    { color: #A020F0 }
-.synType       { color: #2E8B57 ; font-weight: bold }
-.synSpecial    { color: #6A5ACD }
-.synUnderlined { color: #000000 ; text-decoration: underline }
-.synError      { color: #FFFFFF ; background: #FF0000 none }
-.synTodo       { color: #0000FF ; background: #FFFF00 none }
-</style>
 <body>
 <div class="container">
 <hr class="space" />
@@ -213,9 +197,7 @@ pre { border: 1px solid #ccc; background-color: #eee; border: 1px solid #888; pa
 <hr />
 ?= Text::MicroTemplate::encoded_string $content
 ? for my $log ( @$git_logs ) {
-<pre>
-<?= $log ?>
-</pre>
+?= Text::MicroTemplate::encoded_string $log
 ? }
 </div>
 </body>

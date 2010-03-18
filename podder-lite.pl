@@ -21,19 +21,26 @@ sub app {
     my $req = Plack::Request->new( $env );
     my $current = $req->path_info;
     $current =~ s!^/!./!;
+
+    if( -B $current ) {
+        my $body = file($current)->slurp;
+        return [200,[ 'Content-Length' => length $body ],[ $body ]];
+    }
+
     my $base = $req->base;
+
     if ( -d $current ) {
         $current = dir($current);
         my ($children, $git_logs) = get_dir($current);
-        make_response( render('dir.mt') );
+        return make_response( render('dir.mt') );
     }
-    elsif( -f $current ) {
+
+    if( -f $current ) {
         $current = file($current);
         my ($content, $git_logs) = get_file($current);
-        make_response( render('file.mt') );
-    }else{
-        return [404,[],['404 Document Not Found']];
+        return make_response( render('file.mt') );
     }
+    return [404,[],['404 Document Not Found']];
 }
 
 sub make_response {
@@ -68,8 +75,9 @@ sub get_file {
         $html = '<pre>' . highlight( $text ) . '</pre>';
     }
     if(wantarray){
-        my $git_logs = git_diff( $path );
-        $git_logs .= git_log( $path );
+        my $git_logs;
+        push @$git_logs, git_diff( $path );
+        push @$git_logs, git_log( $path );
         return ( $html, $git_logs );
     }else{
         return $html;
@@ -141,6 +149,10 @@ Run on your directory to want to see.
 
   $ ./podder-lite.pl
 
+=head1 HOW TO GET
+
+  $ git clone git://gist.github.com/336278.git gist-336278
+
 =head1 AUTHOR
 
 Yusuke Wada
@@ -200,8 +212,10 @@ pre { border: 1px solid #ccc; background-color: #eee; border: 1px solid #888; pa
 <h1><?= $current ?></h1>
 <hr />
 ?= Text::MicroTemplate::encoded_string $content
+? for my $log ( @$git_logs ) {
 <pre>
-<?= $git_logs ?>
+<?= $log ?>
 </pre>
+? }
 </div>
 </body>

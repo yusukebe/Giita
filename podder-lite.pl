@@ -55,7 +55,7 @@ sub get_file {
         $html .= pod( $text );
         $html .= '<pre class="code">' . highlight( $text ) . '</pre>';
     }else{
-        $html = highlight( $text );
+        $html = '<pre>' . highlight( $text ) . '</pre>';
     }
     return $html;
 }
@@ -103,7 +103,7 @@ podder-lite - Yet another document viewer support perl and pod.
 
 =head1 SYNOPSIS
 
-Run your directory to want to see.
+Run on your directory to want to see.
 
   $ ./podder-lite.pl
 

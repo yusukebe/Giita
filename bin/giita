@@ -172,11 +172,11 @@ giita - Lightweight Rock Band.
 
 =head1 DESCRIPTION
 
-Yet another document viewer support perl and pod using "many" CPAN modules.
+Yet another git repository viewer support perl and pod styling using "many" CPAN modules.
 
 =head1 SYNOPSIS
 
-Run on your directory to want to see.
+Run on your git directory to want to see.
 
   $ giita
 

@@ -12,8 +12,10 @@ use Git::Class::Cmd;
 
 our $VERSION = '0.01';
 
-my $git_root = dir('.git')->stringify;
-my $git_cmd = Git::Class::Cmd->new( die_on_error => 1 , git_dir => $git_root );
+my $root = dir('./');
+my @root_path = split '/', $root->absolute;
+my $root_name = pop @root_path;
+my $git_cmd = Git::Class::Cmd->new( die_on_error => 1 , git_dir => $root->subdir('.git') );
 
 my $runner = Plack::Runner->new;
 $runner->parse_options(@ARGV);
@@ -179,6 +181,7 @@ it under the same terms as Perl itself.
 __DATA__
 
 @@ dir.mt
+<title><?= $root_name ?></title>
 <link rel="stylesheet" href="http://gist.github.com/raw/336278/f542e3051457773bfa4503e283a1a182b0ce7b12/screen.css" type="text/css" media="screen, projection">
 <link rel="stylesheet" href="https://gist.github.com/raw/336278/fdf7ab297096363df7ba67180ff3b672949f64fc/site.css" type="text/css" media="screen, projection">
 <link rel="stylesheet" href="http://gist.github.com/raw/336278/fdb82208e9920c801638671f92a8fd0b62902464/print.css" type="text/css" media="print">
@@ -188,9 +191,9 @@ __DATA__
 <hr class="space" />
 <h1>
 ? my @path = split '/', $current;
-? unshift @path, '.' if $current ne '.';
 ? my $current_path = pop @path;
 ? my $path_info = '';
+<a href="<?= $base ?>"><?= $root_name ?></a> /
 ? for my $p ( @path ) {
 ? $path_info .= $p . '/';
 <a href="<?= $base ?><?= $path_info ?>">
@@ -214,6 +217,7 @@ __DATA__
 </body>
 
 @@ file.mt
+<title><?= $root_name ?></title>
 <link rel="stylesheet" href="http://gist.github.com/raw/336278/f542e3051457773bfa4503e283a1a182b0ce7b12/screen.css" type="text/css" media="screen, projection">
 <link rel="stylesheet" href="https://gist.github.com/raw/336278/fdf7ab297096363df7ba67180ff3b672949f64fc/site.css" type="text/css" media="screen, projection">
 <link rel="stylesheet" href="ttp://gist.github.com/raw/336278/fdb82208e9920c801638671f92a8fd0b62902464/print.css" type="text/css" media="print">
@@ -223,9 +227,9 @@ __DATA__
 <hr class="space" />
 <h1>
 ? my @path = split '/', $current;
-? unshift @path, '.' unless $current =~ m!^./!;
 ? my $current_path = pop @path;
 ? my $path_info = '';
+<a href="<?= $base ?>"><?= $root_name ?></a> /
 ? for my $p ( @path ) {
 ? $path_info .= $p . '/';
 <a href="<?= $base ?><?= $path_info ?>"><?= $p ?></a> /

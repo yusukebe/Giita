@@ -205,7 +205,7 @@ __DATA__
 ? for my $obj ( @$children ) {
 ? my ($obj_name) = $obj->stringify =~ m!/([^/]+)$!;
 ? $obj_name ||= $obj->stringify;
-<li><a href="<?= $base ?><?= $obj ?>"><?= $obj_name ?></a></li>
+<li class="<? if ( $obj->is_dir ) { ?>dir<? }else { ?>file<? } ?>"><a href="<?= $base ?><?= $obj ?>"><?= $obj_name ?></a></li>
 ? }
 </ul>
 ? for my $log ( @$git_logs ) {

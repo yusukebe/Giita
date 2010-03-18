@@ -12,3 +12,5 @@ pre.git { font-size:0.8em; }
 .synUnderlined { color: #000000 ; text-decoration: underline }
 .synError      { color: #FFFFFF ; background: #FF0000 none }
 .synTodo       { color: #0000FF ; background: #FFFF00 none }
+ul li.dir {  list-style-image: url('http://github.com/yusukebe/giita/raw/master/static/folder.png'); }
+ul li.file {  list-style-image: url('http://github.com/yusukebe/giita/raw/master/static/document.png'); }

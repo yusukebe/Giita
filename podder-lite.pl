@@ -6,6 +6,10 @@ use Plack::Request;
 use Text::VimColor;
 use Pod::Simple::XHTML;
 use HTML::TreeBuilder::XPath;
+use Git::Class::Cmd;
+
+my $git_root = dir('.git')->stringify;
+my $git_cmd = Git::Class::Cmd->new( die_on_error => 1 , git_dir => $git_root );
 
 #XXX
 my $runner = Plack::Runner->new;
@@ -20,12 +24,12 @@ sub app {
     my $base = $req->base;
     if ( -d $current ) {
         $current = dir($current);
-        my @children = get_dir($current);
+        my ($children, $git_logs) = get_dir($current);
         make_response( render('dir.mt') );
     }
     elsif( -f $current ) {
         $current = file($current);
-        my $html = get_file($current);
+        my ($content, $git_logs) = get_file($current);
         make_response( render('file.mt') );
     }else{
         return [404,[],['404 Document Not Found']];
@@ -43,7 +47,13 @@ sub make_response {
 sub get_dir {
     my $path = shift;
     $path ||= dir('./');
-    return $path->children;
+    my @children = $path->children;
+    if( wantarray ){
+        my $git_logs = git_show();
+        return (\@children, $git_logs);
+    }else{
+        return \@children;
+    }
 }
 
 sub get_file {
@@ -57,7 +67,13 @@ sub get_file {
     }else{
         $html = '<pre>' . highlight( $text ) . '</pre>';
     }
-    return $html;
+    if(wantarray){
+        my $git_logs = git_diff( $path );
+        $git_logs .= git_log( $path );
+        return ( $html, $git_logs );
+    }else{
+        return $html;
+    }
 }
 
 sub highlight {
@@ -95,11 +111,29 @@ sub highlight_pod {
     return $html;
 }
 
+sub git_show {
+    my $log =
+      $git_cmd->git( 'show' );
+    return $log;
+}
+
+sub git_log {
+    my $path = shift;
+    my $log = $git_cmd->git( 'log', $path );
+    return $log;
+}
+
+sub git_diff {
+    my $path = shift;
+    my $log = $git_cmd->git( 'diff', $path );
+    return $log;
+}
+
 zigorou; #XXX
 
 =head1 NAME
 
-podder-lite - Yet another document viewer support perl and pod.
+podder-lite - Yet another document viewer support perl and pod using "many" CPAN modules.
 
 =head1 SYNOPSIS
 
@@ -121,16 +155,23 @@ __DATA__
 <!--[if lt IE 8]><link rel="stylesheet" href="http://gist.github.com/raw/336278/3dddda9451f84f20b5b0b27307f0eac4f1a535fe/ie.css" type="text/css" media="screen, projection"><![endif]-->
 <style type="text/css">
 p, li { font-size: 1.2em; }
+pre, pre code { font-family: 'Monaco', monospace; }
+pre { border: 1px solid #ccc; background-color: #eee; border: 1px solid #888; padding: 1em; overflow:auto;}
 </style>
 <body>
 <div class="container">
 <hr class="space" />
 <h1><?= $current ?></h1>
+<hr />
 <ul>
-? for my $obj ( @children ) {
+? for my $obj ( @$children ) {
 <li><a href="<?= $base ?><?= $obj ?>"><?= $obj ?></a></li>
 ? }
 </ul>
+<h2>git info</h2>
+<pre>
+<?= $git_logs ?>
+</pre>
 </div>
 </body>
 
@@ -157,6 +198,10 @@ pre { border: 1px solid #ccc; background-color: #eee; border: 1px solid #888; pa
 <div class="container">
 <hr class="space" />
 <h1><?= $current ?></h1>
-?= Text::MicroTemplate::encoded_string $html
+<hr />
+?= Text::MicroTemplate::encoded_string $content
+<pre>
+<?= $git_logs ?>
+</pre>
 </div>
 </body>

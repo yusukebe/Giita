@@ -12,10 +12,11 @@ use Git::Class::Cmd;
 
 our $VERSION = '0.01';
 
-my $root = dir('./');
+my $root      = dir('./');
 my @root_path = split '/', $root->absolute;
 my $root_name = pop @root_path;
-my $git_cmd = Git::Class::Cmd->new( die_on_error => 1 , git_dir => $root->subdir('.git') );
+my $git_cmd =
+  Git::Class::Cmd->new( die_on_error => 1, git_dir => $root->subdir('.git') );
 
 my $runner = Plack::Runner->new;
 $runner->parse_options(@ARGV);
@@ -52,7 +53,7 @@ sub make_response {
     my $body = shift;
     my $head = render('head.mt');
     my $foot = render('foot.mt');
-    my $res = res(200);
+    my $res  = res(200);
     $res->body( $head . $body . $foot );
     $res->content_type('text/html');
     $res->finalize;
@@ -62,9 +63,10 @@ sub get_dir {
     my $path = shift;
     $path ||= dir('./');
     my @children = $path->children;
-    if( wantarray ){
-        return (\@children, git_info( $path ) );
-    }else{
+    if (wantarray) {
+        return ( \@children, git_info($path) );
+    }
+    else {
         return \@children;
     }
 }
@@ -74,19 +76,21 @@ sub get_file {
     my $text = $path->slurp;
     my $html;
     my ($ext) = $path->basename =~ /\.([^\.]+)$/;
-    if( $ext =~ /(?:pm|pl|psgi|pod|t)/i ){
-        $html .= pod( $text );
-        $html .= '<pre class="code">' . highlight( $text ) . '</pre>';
-    }elsif( $ext =~ /(?:md|mkdn)/i ){
-        $html .= markdown( $text );
-        $html .= '<pre>' . highlight( $text ) . '</pre>';
+    if ( $ext =~ /(?:pm|pl|psgi|pod|t)/i ) {
+        $html .= pod($text);
+        $html .= '<pre class="code">' . highlight($text) . '</pre>';
     }
-    else{
-        $html = '<pre>' . highlight( $text ) . '</pre>';
+    elsif ( $ext =~ /(?:md|mkdn)/i ) {
+        $html .= markdown($text);
+        $html .= '<pre>' . highlight($text) . '</pre>';
     }
-    if(wantarray){
+    else {
+        $html = '<pre>' . highlight($text) . '</pre>';
+    }
+    if (wantarray) {
         return ( $html, git_info($path) );
-    }else{
+    }
+    else {
         return $html;
     }
 }
@@ -94,9 +98,9 @@ sub get_file {
 sub git_info {
     my $path = shift;
     my $git_logs;
-    my $git_diff = git_diff( $path );
-    my $git_log = git_log( $path );
-    push @$git_logs, highlight( $git_diff ,'diff' ) if $git_diff;
+    my $git_diff = git_diff($path);
+    my $git_log  = git_log($path);
+    push @$git_logs, highlight( $git_diff, 'diff' ) if $git_diff;
     push @$git_logs, $git_log if $git_log;
     return $git_logs;
 }
@@ -112,14 +116,14 @@ sub highlight {
 }
 
 sub pod {
-    my $text = shift;
+    my $text   = shift;
     my $parser = Pod::Simple::XHTML->new();
     my $html;
     $parser->output_string( \$html );
     $parser->html_header('');
     $parser->html_footer('');
     $parser->html_h_level(3);
-    $parser->parse_string_document( $text );
+    $parser->parse_string_document($text);
     $html = highlight_pod($html);
     $html = '<div class="pod">' . $html . '</div>';
     return $html;
@@ -140,7 +144,7 @@ sub highlight_pod {
 sub git_log {
     my $path = shift;
     my $log = $git_cmd->git( 'log', $path );
-    return escape( $log );
+    return escape($log);
 }
 
 sub git_diff {
@@ -150,8 +154,14 @@ sub git_diff {
 }
 
 sub escape {
-    my $html = shift;
-    my %_escape_table = ( '&' => '&amp;', '>' => '&gt;', '<' => '&lt;', '"' => '&quot;', '\'' => '&#39;' );
+    my $html          = shift;
+    my %_escape_table = (
+        '&'  => '&amp;',
+        '>'  => '&gt;',
+        '<'  => '&lt;',
+        '"'  => '&quot;',
+        '\'' => '&#39;'
+    );
     $html =~ s/([&><\"\'])/$_escape_table{$1}/gme;
     return $html;
 }
@@ -160,9 +170,12 @@ sub escape {
 
 giita - Lightweight Rock Band.
 
-=head1 SYNOPSIS
+=head1 DESCRIPTION
 
 Yet another document viewer support perl and pod using "many" CPAN modules.
+
+=head1 SYNOPSIS
+
 Run on your directory to want to see.
 
   $ giita

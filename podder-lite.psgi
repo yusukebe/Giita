@@ -142,7 +142,7 @@ podder-lite - Yet another document viewer support perl and pod using "many" CPAN
 
 Run on your directory to want to see.
 
-  $ ./podder-lite.pl
+  $ plackup podder-lite.psgi
 
 =head1 HOW TO GET
 

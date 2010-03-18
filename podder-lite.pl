@@ -11,11 +11,6 @@ use Git::Class::Cmd;
 my $git_root = dir('.git')->stringify;
 my $git_cmd = Git::Class::Cmd->new( die_on_error => 1 , git_dir => $git_root );
 
-#XXX
-my $runner = Plack::Runner->new;
-$runner->parse_options(@ARGV);
-$runner->run( sub { app(@_) } );
-
 sub app {
     my $env = shift;
     my $req = Plack::Request->new( $env );
@@ -76,8 +71,8 @@ sub get_file {
     }
     if(wantarray){
         my $git_logs;
-        push @$git_logs, '<pre class="git">' . highlight( git_diff( $path ) ) . '</pre>';
-        push @$git_logs, '<pre class="git">' . highlight( git_log( $path ) ) . '</pre>';
+        push @$git_logs, '<pre class="git">' . highlight( git_diff( $path ),'diff' ) . '</pre>';
+        push @$git_logs, '<pre class="git">' . git_log( $path ) . '</pre>';
         return ( $html, $git_logs );
     }else{
         return $html;
@@ -85,11 +80,11 @@ sub get_file {
 }
 
 sub highlight {
-    my ($text,$type) = @_;
+    my ( $text, $type ) = @_;
     $type ||= 'perl';
     my $syntax = Text::VimColor->new(
         string   => $text,
-        filetype => 'perl',
+        filetype => $type,
     );
     return $syntax->html;
 }
@@ -138,7 +133,7 @@ sub git_diff {
     return $log;
 }
 
-zigorou; #XXX
+\&app;
 
 =head1 NAME
 
@@ -164,6 +159,7 @@ __DATA__
 
 @@ dir.mt
 <link rel="stylesheet" href="http://gist.github.com/raw/336278/f542e3051457773bfa4503e283a1a182b0ce7b12/screen.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="http://gist.github.com/raw/336278/e8e7b9aa8fffb554b74953c66d7c581b3c4ea903/site.css" type="text/css" media="screen, projection">
 <link rel="stylesheet" href="http://gist.github.com/raw/336278/fdb82208e9920c801638671f92a8fd0b62902464/print.css" type="text/css" media="print">
 <!--[if lt IE 8]><link rel="stylesheet" href="http://gist.github.com/raw/336278/3dddda9451f84f20b5b0b27307f0eac4f1a535fe/ie.css" type="text/css" media="screen, projection"><![endif]-->
 <style type="text/css">
@@ -188,7 +184,8 @@ pre { border: 1px solid #ccc; background-color: #eee; border: 1px solid #888; pa
 
 @@ file.mt
 <link rel="stylesheet" href="http://gist.github.com/raw/336278/f542e3051457773bfa4503e283a1a182b0ce7b12/screen.css" type="text/css" media="screen, projection">
-<link rel="stylesheet" href="http://gist.github.com/raw/336278/fdb82208e9920c801638671f92a8fd0b62902464/print.css" type="text/css" media="print">
+<link rel="stylesheet" href="http://gist.github.com/raw/336278/e8e7b9aa8fffb554b74953c66d7c581b3c4ea903/site.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="ttp://gist.github.com/raw/336278/fdb82208e9920c801638671f92a8fd0b62902464/print.css" type="text/css" media="print">
 <!--[if lt IE 8]><link rel="stylesheet" href="http://gist.github.com/raw/336278/3dddda9451f84f20b5b0b27307f0eac4f1a535fe/ie.css" type="text/css" media="screen, projection"><![endif]-->
 <body>
 <div class="container">

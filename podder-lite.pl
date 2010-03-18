@@ -23,10 +23,12 @@ sub app {
         my @children = get_dir($current);
         make_response( render('dir.mt') );
     }
-    else {
+    elsif( -f $current ) {
         $current = file($current);
         my $html = get_file($current);
         make_response( render('file.mt') );
+    }else{
+        return [404,[],['404 Document Not Found']];
     }
 }
 
@@ -97,13 +99,13 @@ zigorou; #XXX
 
 =head1 NAME
 
-mojamoja(kari) - Yet another document viewer support perl and pod.
+podder-lite - Yet another document viewer support perl and pod.
 
 =head1 SYNOPSIS
 
 Run your directory to want to see.
 
-  $ ./mojamoja.pl
+  $ ./podder-lite.pl
 
 =head1 AUTHOR
 
@@ -114,16 +116,31 @@ Yusuke Wada
 __DATA__
 
 @@ dir.mt
+<link rel="stylesheet" href="http://gist.github.com/raw/336278/f542e3051457773bfa4503e283a1a182b0ce7b12/screen.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="http://gist.github.com/raw/336278/fdb82208e9920c801638671f92a8fd0b62902464/print.css" type="text/css" media="print">
+<!--[if lt IE 8]><link rel="stylesheet" href="http://gist.github.com/raw/336278/3dddda9451f84f20b5b0b27307f0eac4f1a535fe/ie.css" type="text/css" media="screen, projection"><![endif]-->
+<style type="text/css">
+p, li { font-size: 1.2em; }
+</style>
+<body>
+<div class="container">
+<hr class="space" />
 <h1><?= $current ?></h1>
 <ul>
 ? for my $obj ( @children ) {
 <li><a href="<?= $base ?><?= $obj ?>"><?= $obj ?></a></li>
 ? }
 </ul>
+</div>
+</body>
 
 @@ file.mt
+<link rel="stylesheet" href="http://gist.github.com/raw/336278/f542e3051457773bfa4503e283a1a182b0ce7b12/screen.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="http://gist.github.com/raw/336278/fdb82208e9920c801638671f92a8fd0b62902464/print.css" type="text/css" media="print">
+<!--[if lt IE 8]><link rel="stylesheet" href="http://gist.github.com/raw/336278/3dddda9451f84f20b5b0b27307f0eac4f1a535fe/ie.css" type="text/css" media="screen, projection"><![endif]-->
 <style type="text/css">
-pre, pre code { font-family: 'Monaco', monospace; font-size:0.8em; }
+p, li { font-size: 1.2em; }
+pre, pre code { font-family: 'Monaco', monospace; }
 pre { border: 1px solid #ccc; background-color: #eee; border: 1px solid #888; padding: 1em; overflow:auto;}
 .synComment    { color: #0000FF }
 .synConstant   { color: #FF00FF }
@@ -136,5 +153,10 @@ pre { border: 1px solid #ccc; background-color: #eee; border: 1px solid #888; pa
 .synError      { color: #FFFFFF ; background: #FF0000 none }
 .synTodo       { color: #0000FF ; background: #FFFF00 none }
 </style>
+<body>
+<div class="container">
+<hr class="space" />
 <h1><?= $current ?></h1>
 ?= Text::MicroTemplate::encoded_string $html
+</div>
+</body>

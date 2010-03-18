@@ -1,8 +1,9 @@
 #!/usr/bin/env perl
-use MojaMoja;
+use MojaMoja qw/render/;
 use Path::Class qw/file dir/;
 use Plack::Runner;
 use Plack::Request;
+use Text::VimColor;
 
 #XXX
 my $runner = Plack::Runner->new;
@@ -22,7 +23,7 @@ sub app {
     }
     else {
         $current = file($current);
-        my $file = get_file($current);
+        my $html = get_file($current);
         make_response( render('file.mt') );
     }
 }
@@ -43,8 +44,21 @@ sub get_dir {
 
 sub get_file {
     my $path = shift;
-    return $path->slurp;
+    my $text = $path->slurp;
+    my $html = highlight( $text );
+    return $html;
 }
+
+sub highlight {
+    my $text = shift;
+    my $syntax = Text::VimColor->new(
+        string   => $text,
+        filetype => 'perl',
+    );
+    return $syntax->html;
+}
+
+zigorou; #XXX
 
 __DATA__
 
@@ -57,7 +71,19 @@ __DATA__
 </ul>
 
 @@ file.mt
+<style type="text/css">
+.synComment    { color: #0000FF }
+.synConstant   { color: #FF00FF }
+.synIdentifier { color: #008B8B }
+.synStatement  { color: #A52A2A ; font-weight: bold }
+.synPreProc    { color: #A020F0 }
+.synType       { color: #2E8B57 ; font-weight: bold }
+.synSpecial    { color: #6A5ACD }
+.synUnderlined { color: #000000 ; text-decoration: underline }
+.synError      { color: #FFFFFF ; background: #FF0000 none }
+.synTodo       { color: #0000FF ; background: #FFFF00 none }
+</style>
 <h1><?= $current ?></h1>
 <pre>
-<?= $file ?>
+?= Text::MicroTemplate::encoded_string $html
 </pre>

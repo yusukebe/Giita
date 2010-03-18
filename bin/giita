@@ -31,7 +31,7 @@ sub app {
     my $base = $req->base;
 
     if( my $sha = $req->param('diff') ) {
-        my $git_diff = git_diff($sha, 'diff');
+        my $git_diff = git_diff($sha);
         return make_response( render('diff.mt') );
     }
 
@@ -161,7 +161,7 @@ sub git_log {
 sub git_diff {
     my $path = shift;
     my $log = $git_cmd->git( 'diff', $path );
-    $log = highlight($log) if $log;
+    $log = highlight($log, 'diff') if $log;
     return $log;
 }
 

@@ -1,0 +1,23 @@
+# giita - Lightweight Rock Band.
+
+## DESCITPTION [これは何？]
+
+Yet another document viewer supports Perl code, POD, and git repository.
+
+Perlのコード, POD, gitレポジトリなどに対応したもう一つのドキュメントビューアー.
+
+Depends many CPAN modules.
+
+たくさんのCPANモジュールに依存している.
+
+## HOW TO GET [入手方法]
+
+> $ git clone git://github.com/yusukebe/giita.git
+
+## PLAY [演奏する]
+
+> $ ./bin/giita
+
+## AUTHOR [作者]
+
+Yusuke Wada ( yusuke at kamawada.com )

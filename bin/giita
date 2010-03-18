@@ -6,6 +6,7 @@ use Plack::Runner;
 use Plack::Request;
 use Text::VimColor;
 use Pod::Simple::XHTML;
+use Text::Markdown qw/markdown/;
 use HTML::TreeBuilder::XPath;
 use Git::Class::Cmd;
 
@@ -70,7 +71,11 @@ sub get_file {
     if( $ext =~ /(?:pm|pl|psgi|pod|t)/i ){
         $html .= pod( $text );
         $html .= '<pre class="code">' . highlight( $text ) . '</pre>';
-    }else{
+    }elsif( $ext =~ /(?:md|mkdn)/i ){
+        $html .= markdown( $text );
+        $html .= '<pre>' . highlight( $text ) . '</pre>';
+    }
+    else{
         $html = '<pre>' . highlight( $text ) . '</pre>';
     }
     if(wantarray){
@@ -181,7 +186,9 @@ __DATA__
 ? my $path_info = '';
 ? for my $p ( @path ) {
 ? $path_info .= $p . '/';
-<a href="<?= $base ?><?= $path_info ?>"><?= $p ?></a> /
+<a href="<?= $base ?><?= $path_info ?>">
+<?= $p ?>
+</a> /
 ? }
 <?= $current_path ?>
 </h1>

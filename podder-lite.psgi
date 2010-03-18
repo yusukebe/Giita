@@ -1,4 +1,3 @@
-#!/usr/bin/env perl
 use MojaMoja qw/render/;
 use Path::Class qw/file dir/;
 use Plack::Runner;

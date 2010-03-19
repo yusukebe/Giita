@@ -47,13 +47,49 @@ sub app {
 }
 
 sub make_response {
-    my $body = shift;
+    my ( $self, $body ) = @_;
     my $head = render('head.mt');
     my $foot = render('foot.mt');
     my $res  = res(200);
     $res->body( $head . $body . $foot );
     $res->content_type('text/html');
     $res->finalize;
+}
+
+sub get_dir {
+    my ( $self, $path ) = @_;
+    $path ||= dir('./');
+    my @children = $path->children;
+    if (wantarray) {
+        return ( \@children, git_log($path) );
+    }
+    else {
+        return \@children;
+    }
+}
+
+sub get_file {
+    my ( $self, $path ) = @_;
+    my $text = $path->slurp;
+    my $html;
+    my ($ext) = $path->basename =~ /\.([^\.]+)$/;
+    if ( $ext =~ /(?:pm|pl|psgi|pod|t)/i ) {
+        $html .= pod($text);
+        $html .= '<pre class="code">' . highlight($text) . '</pre>';
+    }
+    elsif ( $ext =~ /(?:md|mkdn)/i ) {
+        $html .= markdown($text);
+        $html .= '<pre>' . highlight($text) . '</pre>';
+    }
+    else {
+        $html = '<pre>' . highlight($text) . '</pre>';
+    }
+    if (wantarray) {
+        return ( $html, git_log($path) );
+    }
+    else {
+        return $html;
+    }
 }
 
 $Giita::rock;

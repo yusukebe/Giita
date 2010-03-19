@@ -32,7 +32,7 @@ sub pod {
     $parser->output_string( \$html );
     $parser->html_header('');
     $parser->html_footer('');
-    $parser->html_h_level(3);
+    $parser->html_h_level(2);
     $parser->parse_string_document($text);
     $html = $self->highlight_pod($html);
     $html = '<div class="pod">' . $html . '</div>';

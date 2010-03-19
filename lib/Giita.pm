@@ -1,13 +1,19 @@
 package Giita;
 use strict;
 use warnings;
-use MojaMoja qw/render/;
 use Path::Class qw/file dir/;
 use Plack::Request;
 use Giita::Filter;
 use Giita::Git;
+use Text::MicroTemplate ();
+use Data::Section::Simple ();
+use Plack::Response;
 
 our $VERSION = '0.01';
+
+my %CACHE;
+our $KEY;
+our $DATA_SECTION_LEVEL = 0;
 
 sub new {
     my ( $class, %opt ) = @_;
@@ -41,14 +47,13 @@ sub app {
 
         if ( $req->path_info eq '/' ){
             my @repos = @{ $self->{repos} };
-            return $self->make_response( render( 'index.mt') );
+            return $self->make_response( $self->render( 'index.mt') );
         }
 
         my $current = $req->path_info;
         my ($name) = $current =~ /^\/([^\/]+)/;
         my $repo = $self->get_repo( $name ) or $self->handle_404;
         $self->dispatch( $req, $repo );
-# TODO
     };
 }
 
@@ -63,7 +68,7 @@ sub dispatch {
     if ( my $sha = $req->param('commit') ) {
         my $git_commit = $repo->{git}->show($sha);
         $git_commit = $self->{filter}->highlight($git_commit, 'diff');
-        return $self->make_response( render('commit.mt') );
+        return $self->make_response( $self->render('commit.mt') );
     }
 
     my $path_info = $req->path_info || '';
@@ -78,7 +83,7 @@ sub dispatch {
             $repo->{git}->log( $current, $repo )
         );
         my $links = $self->get_links($path_info);
-        return $self->make_response( render('dir.mt') );
+        return $self->make_response( $self->render('dir.mt') );
     }
     if ( -B $current ) {
         my $body = file($current)->slurp;
@@ -89,7 +94,7 @@ sub dispatch {
         my ( $content, $git_logs ) =
             ( $self->get_file($current), $repo->{git}->log($current, $repo) );
         my $links = $self->get_links($path_info);
-        return $self->make_response( render('file.mt') );
+        return $self->make_response( $self->render('file.mt') );
     }
     return;
 }
@@ -108,8 +113,8 @@ sub get_links {
 
 sub make_response {
     my ( $self, $body ) = @_;
-    my $head = render('head.mt');
-    my $foot = render('foot.mt');
+    my $head = $self->render('head.mt');
+    my $foot = $self->render('foot.mt');
     my $res  = res(200);
     $res->body( $head . $body . $foot );
     $res->content_type('text/html');
@@ -147,6 +152,36 @@ sub get_file {
     }
     return $html;
 }
+
+#XXX stolen from MojaMoja
+sub get_data_section {
+    my $pkg  = caller($DATA_SECTION_LEVEL);
+    no warnings; #XXX
+    my $data = $CACHE{$KEY}->{__data_section} ||=
+      Data::Section::Simple->new($pkg)->get_data_section;
+    return @_ ? $data->{ $_[0] } : $data;
+}
+
+sub render {
+    my ( $self, $key, @args ) = @_;
+    no warnings; #XXX
+    my $code = $CACHE{$KEY}->{$key} ||= do {
+        local $DATA_SECTION_LEVEL = $DATA_SECTION_LEVEL + 1;
+        my $tmpl = get_data_section($key);
+        Carp::croak("unknown template file:$key") unless $tmpl;
+        Text::MicroTemplate->new( template => $tmpl, package_name => 'main' )
+          ->code();
+    };
+    package DB;
+    local *DB::render = sub {
+        my $coderef = ( eval $code );    ## no critic
+        die "Cannot compile template '$key': $@" if $@;
+        $coderef->(@args);
+    };
+    goto &DB::render;
+}
+
+sub res { Plack::Response->new(@_) }
 
 1;
 

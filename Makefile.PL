@@ -11,6 +11,9 @@ requires 'Pod::Simple::XHTML';
 requires 'Text::Markdown';
 requires 'HTML::TreeBuilder::XPath';
 requires 'Git::Class::Cmd';
+requires 'Text::MicroTemplate';
+requires 'Data::Section::Simple';
+requires 'Plack::Response';
 
 tests 't/*.t';
 author_tests 'xt';

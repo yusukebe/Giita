@@ -1,4 +1,4 @@
-p, li { font-size: 1.2em; }
+p { font-size:1.2em; };
 pre, pre code { font-family: 'Monaco', monospace; }
 pre { border: 1px solid #ccc; background-color: #eee; border: 1px solid #888; padding: 1em; overflow:auto;}
 .synComment    { color: #0000FF }
@@ -13,4 +13,5 @@ pre { border: 1px solid #ccc; background-color: #eee; border: 1px solid #888; pa
 .synTodo       { color: #0000FF ; background: #FFFF00 none }
 ul li.dir {  list-style-image: url('http://github.com/yusukebe/giita/raw/master/static/folder.png'); }
 ul li.file {  list-style-image: url('http://github.com/yusukebe/giita/raw/master/static/document.png'); }
+ul li.dir, ul li.file { font-sieze:1.2em; }
 h1, h2, h3, h4, h5 { font-weight: bold; }

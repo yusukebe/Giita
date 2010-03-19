@@ -235,11 +235,11 @@ __DATA__
 <?= $current_link->{name} ?>
 </h1>
 <hr />
-<div class="span-16">
+<div class="span-17">
 ?= Text::MicroTemplate::encoded_string $content
 </div>
-<div class="span-8 last">
-<pre class="git" style="font-size:0.8em;">
+<div class="span-7 last">
+<pre class="git" style="font-size:0.7em;">
 ?= Text::MicroTemplate::encoded_string $git_logs
 </pre>
 </div>

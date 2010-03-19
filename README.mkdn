@@ -1,4 +1,4 @@
-# giita - Lightweight Rock Band.
+# Giita - Lightweight Rock Band.
 
 ## DESCITPTION [これは何？]
 

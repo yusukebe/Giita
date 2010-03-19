@@ -11,7 +11,7 @@ pre { border: 1px solid #ccc; background-color: #eee; border: 1px solid #888; pa
 .synUnderlined { color: #000000 ; text-decoration: underline }
 .synError      { color: #FFFFFF ; background: #FF0000 none }
 .synTodo       { color: #0000FF ; background: #FFFF00 none }
-ul li.dir {  list-style-image: url('http://github.com/yusukebe/giita/raw/master/static/folder.png'); }
-ul li.file {  list-style-image: url('http://github.com/yusukebe/giita/raw/master/static/document.png'); }
+ul li.dir {  list-style-image: url('http://yusukebe.github.com/Giita/static/folder.png'); }
+ul li.file {  list-style-image: url('http://yusukebe.github.com/Giita/static/document.png'); }
 ul li.dir, ul li.file { font-size:1.2em; }
 h1, h2, h3, h4, h5 { font-weight: bold; }

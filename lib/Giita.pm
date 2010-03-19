@@ -179,8 +179,6 @@ sub render {
     goto &DB::render;
 }
 
-sub res { Plack::Response->new(@_) }
-
 1;
 
 =head1 NAME

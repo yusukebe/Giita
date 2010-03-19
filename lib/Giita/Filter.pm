@@ -2,10 +2,16 @@ package Giita::Filter;
 use Giita;
 use Text::VimColor;
 use Pod::Simple::XHTML;
-use Text::Markdown qw/markdown/;
+use Text::Markdown ();
 use HTML::TreeBuilder::XPath;
 
 sub new { my $self = bless {}, shift; $self };
+
+sub markdown {
+    my ($self, $text) = @_;
+    my $html = Text::Markdown::markdown( $text );
+    return $html;
+}
 
 sub highlight {
     my ( $self, $text, $type ) = @_;

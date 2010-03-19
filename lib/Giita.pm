@@ -23,10 +23,11 @@ sub _init {
     my $repos;
     for ( @$r ) {
         my $dir = dir( $_ );
-        next unless -d $dir->subdir('.git');
+        next unless -d $dir->subdir('.git')->absolute;
+        my $git = Giita::Git->new( git_dir => $dir->subdir('.git')->absolute );
         my @paths = split '/', $dir->absolute;
         my $name = pop @paths;
-        push @$repos, { dir => $dir, name => $name };
+        push @$repos, { dir => $dir, name => $name, git => $git };
     }
     return $repos;
 }
@@ -69,8 +70,11 @@ sub dispatch {
     my $current = $repo->{dir}->absolute . $path_name;
     if ( -d $current ) {
         $current = dir($current);
-        my ( $children, $git_logs ) = $self->get_dir($current);
-        my $links = $self->get_links( $path_info );
+        my ( $children, $git_logs ) = (
+            $self->get_dir( $current ),
+            $repo->{git}->log( $current )
+        );
+        my $links = $self->get_links($path_info);
         return $self->make_response( render('dir.mt') );
     }
     if ( -B $current ) {
@@ -79,8 +83,9 @@ sub dispatch {
     }
     if ( -f $current ) {
         $current = file($current);
-        my ( $content, $git_logs ) = $self->get_file($current);
-        my $links = $self->get_links( $path_info );
+        my ( $content, $git_logs ) =
+            ( $self->get_file($current), $repo->{git}->log($current) );
+        my $links = $self->get_links($path_info);
         return $self->make_response( render('file.mt') );
     }
     return;
@@ -118,12 +123,7 @@ sub get_dir {
     my ( $self, $path ) = @_;
     $path ||= dir('./');
     my @children = $path->children;
-    if (wantarray) {
-        return ( \@children, '' );
-    }
-    else {
-        return \@children;
-    }
+    return \@children;
 }
 
 sub get_file {
@@ -142,12 +142,7 @@ sub get_file {
     else {
         $html = '<pre>' . $self->{filter}->highlight($text) . '</pre>';
     }
-    if (wantarray) {
-        return ( $html, '' );
-    }
-    else {
-        return $html;
-    }
+    return $html;
 }
 
 1;
@@ -211,6 +206,7 @@ __DATA__
 ? }
 </ul>
 <pre class="git">
+?= Text::MicroTemplate::encoded_string $git_logs
 </pre>
 
 @@ file.mt

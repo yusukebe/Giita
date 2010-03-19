@@ -291,10 +291,10 @@ __DATA__
 <html>
 </head>
 <title></title>
-<link rel="stylesheet" href="http://github.com/yusukebe/giita/raw/master/static/screen.css" type="text/css" media="screen, projection" />
-<link rel="stylesheet" href="http://github.com/yusukebe/giita/raw/master/static/site.css" type="text/css" />
-<link rel="stylesheet" href="http://github.com/yusukebe/giita/raw/master/static/print.css" type="text/css" media="print" />
-<!--[if lt IE 8]><link rel="stylesheet" href="http://github.com/yusukebe/giita/raw/master/static/ie.css" type="text/css" media="screen, projection" /><![endif]-->
+<link rel="stylesheet" href="http://yusukebe.github.com/Giita/static/screen.css" type="text/css" media="screen, projection" />
+<link rel="stylesheet" href="http://yusukebe.github.com/Giita/static/site.css" type="text/css" />
+<link rel="stylesheet" href="http://yusukebe.github.com/Giita/static/print.css" type="text/css" media="print" />
+<!--[if lt IE 8]><link rel="stylesheet" href="http://yusukebe.github.com/Giita/static/ie.css" type="text/css" media="screen, projection" /><![endif]-->
 </head>
 <body>
 <div class="container">

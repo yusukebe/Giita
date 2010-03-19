@@ -70,9 +70,10 @@ sub dispatch {
         return $self->make_response( $self->render('commit.mt') );
     }
 
+    warn $req->path_info;
     my $path_info = $req->path_info || '';
     $path_info =~ s!^/!!;
-    my $path_name = $path_info;
+    my $path_name = $path_info || '';
     $path_name =~ s/$repo->{name}//;
     my $current = $repo->{dir}->absolute . $path_name;
     if ( -d $current ) {
@@ -95,7 +96,7 @@ sub dispatch {
         my $links = $self->get_links($path_info);
         return $self->make_response( $self->render('file.mt') );
     }
-    return;
+    return $self->handle_404;
 }
 
 sub get_links {
@@ -290,10 +291,10 @@ __DATA__
 <html>
 </head>
 <title></title>
-<link rel="stylesheet" href="http://github.com/yusukebe/giita/raw/master/static/screen.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="http://github.com/yusukebe/giita/raw/master/static/screen.css" type="text/css" media="screen, projection" />
 <link rel="stylesheet" href="http://github.com/yusukebe/giita/raw/master/static/site.css" type="text/css" />
-<link rel="stylesheet" href="http://github.com/yusukebe/giita/raw/master/static/print.css" type="text/css" media="print">
-<!--[if lt IE 8]><link rel="stylesheet" href="http://github.com/yusukebe/giita/raw/master/static/ie.css" type="text/css" media="screen, projection"><![endif]-->
+<link rel="stylesheet" href="http://github.com/yusukebe/giita/raw/master/static/print.css" type="text/css" media="print" />
+<!--[if lt IE 8]><link rel="stylesheet" href="http://github.com/yusukebe/giita/raw/master/static/ie.css" type="text/css" media="screen, projection" /><![endif]-->
 </head>
 <body>
 <div class="container">

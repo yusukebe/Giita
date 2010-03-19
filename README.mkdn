@@ -1,6 +1,6 @@
 # Giita - Lightweight Rock Band.
 
-## DESCITPTION [これは何？]
+## DESCRIPTION [これは何？]
 
 Yet another dit repository document viewer supports Perl code, POD, and Markdown.
 

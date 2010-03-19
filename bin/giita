@@ -1,12 +1,1 @@
 #!/usr/bin/perl
-use Plack::Runner;
-our $VERSION = '0.01';
-my $root      = dir('./');
-die "Here is not git repository!" unless -d $root->subdir('.git');
-my @root_path = split '/', $root->absolute;
-my $root_name = pop @root_path;
-my $git_cmd =
-  Git::Class::Cmd->new( die_on_error => 1, git_dir => $root->subdir('.git') );
-my $runner = Plack::Runner->new;
-$runner->parse_options(@ARGV);
-$runner->run( sub { app(@_) } );

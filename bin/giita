@@ -173,7 +173,7 @@ sub escape {
 
 =head1 NAME
 
-giita - Lightweight Rock Band.
+Giita - Lightweight Rock Band.
 
 =head1 DESCRIPTION
 
@@ -187,11 +187,11 @@ Run on your git directory to want to see.
 
 =head1 HOW TO GET
 
-  $ git clone git://github.com/yusukebe/giita.git
+  $ git clone git://github.com/yusukebe/Giita.git
 
 =head1 AUTHOR
 
-Yusuke Wada
+Yusuke Wada yusuke at kamawada.com
 
 =head1 LICENSE
 

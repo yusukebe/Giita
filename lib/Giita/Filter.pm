@@ -24,7 +24,7 @@ sub highlight {
 }
 
 sub pod {
-    my ($slf, $text)  = @_;
+    my ($self, $text)  = @_;
     my $parser = Pod::Simple::XHTML->new();
     my $html;
     $parser->output_string( \$html );
@@ -32,17 +32,17 @@ sub pod {
     $parser->html_footer('');
     $parser->html_h_level(3);
     $parser->parse_string_document($text);
-    $html = highlight_pod($html);
+    $html = $self->highlight_pod($html);
     $html = '<div class="pod">' . $html . '</div>';
     return $html;
 }
 
 sub highlight_pod {
-    my ($sef, $html) = @_;
+    my ($self, $html) = @_;
     my $tree = HTML::TreeBuilder::XPath->new;
     $tree->parse($html);
     for my $code ( $tree->findnodes('//pre') ) {
-        my $hilight_code = highlight( $code->as_text );
+        my $hilight_code = $self->highlight( $code->as_text );
         my $code_html    = $code->as_HTML;
         $html =~ s/\Q$code_html\E/<pre>$hilight_code<\/pre>/m;
     }

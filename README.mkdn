@@ -16,7 +16,19 @@ Depends many CPAN modules.
 
 ## PLAY [演奏する]
 
-    $ giita
+In your .psgi
+
+    use Giita;
+
+    my $giita = Giita->new(
+        name  => 'root',
+        repos => [qw( ./ )]
+    );
+    $giita->app;
+
+And run with plackup
+
+    $ plackup giita.psgi
 
 ## AUTHOR [作者]
 

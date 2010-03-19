@@ -7,9 +7,7 @@ sub new {
     my ( $class, %opt ) = @_;
     my $self = bless {
         git_dir => $opt{git_dir},
-        cmd => Git::Class::Cmd->new(
-#            die_on_error => 1,
-        ),
+        cmd => Git::Class::Cmd->new,
     }, $class;
     $self->{root_dir} = $self->{git_dir};
     $self->{root_dir} =~ s/\.git$//;
@@ -22,7 +20,7 @@ sub cmd {
 }
 
 sub log {
-    my ( $self, $abs ) = @_;
+    my ( $self, $abs, $repo ) = @_;
     my $path = $abs->absolute;
     $path =~ s/$self->{root_dir}//;
     $path = ".$path";
@@ -30,7 +28,7 @@ sub log {
     $log = $self->escape($log);
     my $html;
     for my $l ( split '\n', $log ) {
-        $l =~ s!commit\s([0-9a-z]{40})!commit <a href="/?commit=$1">$1</a>!;
+        $l =~ s!commit\s([0-9a-z]{40})!commit <a href="/$repo->{name}?commit=$1">$1</a>!;
         $html .= $l . "\n";
     }
     return $html;
@@ -39,7 +37,6 @@ sub log {
 sub show {
     my ( $self, $sha ) = @_;
     my $log = $self->cmd->git( 'show', $sha );
-    $log = $self->highlight( $log, 'diff' ) if $log;
     return $log;
 }
 

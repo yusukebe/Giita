@@ -49,10 +49,6 @@ sub app {
         my $repo = $self->get_repo( $name ) or $self->handle_404;
         $self->dispatch( $req, $repo );
 # TODO
-#         if ( my $sha = $req->param('commit') ) {
-#             my $git_commit = $self->git_show($sha);
-#             return $self->make_response( render('commit.mt') );
-#         }
     };
 }
 
@@ -63,6 +59,13 @@ sub handle_404 {
 sub dispatch {
     my ( $self, $req, $repo ) = @_;
     my $base = $req->base;
+
+    if ( my $sha = $req->param('commit') ) {
+        my $git_commit = $repo->{git}->show($sha);
+        $git_commit = $self->{filter}->highlight($git_commit, 'diff');
+        return $self->make_response( render('commit.mt') );
+    }
+
     my $path_info = $req->path_info || '';
     $path_info =~ s!^/!!;
     my $path_name = $path_info;
@@ -72,7 +75,7 @@ sub dispatch {
         $current = dir($current);
         my ( $children, $git_logs ) = (
             $self->get_dir( $current ),
-            $repo->{git}->log( $current )
+            $repo->{git}->log( $current, $repo )
         );
         my $links = $self->get_links($path_info);
         return $self->make_response( render('dir.mt') );
@@ -84,7 +87,7 @@ sub dispatch {
     if ( -f $current ) {
         $current = file($current);
         my ( $content, $git_logs ) =
-            ( $self->get_file($current), $repo->{git}->log($current) );
+            ( $self->get_file($current), $repo->{git}->log($current, $repo) );
         my $links = $self->get_links($path_info);
         return $self->make_response( render('file.mt') );
     }
@@ -149,17 +152,29 @@ sub get_file {
 
 =head1 NAME
 
-Giita - Lightweight Rock Band.
+Giita - Yet another document viewer for local directory of git repository.
 
 =head1 DESCRIPTION
 
 Yet another git repository viewer support perl and pod styling using "many" CPAN modules.
 
+But, we are lightweight rock band.
+
 =head1 SYNOPSIS
 
-Run on your git directory to want to see.
+In your .psgi
 
-  $ giita
+  use Giita;
+
+  my $giita = Giita->new(
+      name  => 'root',
+      repos => [qw( ./ )]
+  );
+  $giita->app;
+
+And run with plackup
+
+  $ plackup giita.psgi
 
 =head1 HOW TO GET
 
@@ -176,7 +191,6 @@ it under the same terms as Perl itself.
 
 =cut
 
-
 __DATA__
 
 @@ index.mt
@@ -186,7 +200,6 @@ __DATA__
 ? for my $repo ( @repos ) {
 <h2><a href="<?= $base ?><?= $repo->{name} ?>"><?= $repo->{name} ?></a></h2>
 ? }
-
 
 @@ dir.mt
 <h1>
@@ -232,7 +245,9 @@ __DATA__
 </div>
 
 @@ commit.mt
-<h1><a href="<?= $base ?>"><?= $root_name ?></a> / <?= $sha ?></h1>
+<h1><a href="<?= $base ?>">Repos</a> /
+<a href="<?= $base ?><?= $repo->{name} ?>"><?= $repo->{name} ?></a><h1>
+<h2><?= $sha ?></h2>
 <hr />
 <pre class="git">
 ?= Text::MicroTemplate::encoded_string $git_commit

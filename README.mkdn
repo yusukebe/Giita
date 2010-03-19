@@ -22,7 +22,7 @@ In your .psgi
 
     my $giita = Giita->new(
         name  => 'root',
-        repos => [qw( ./ )]
+        repos => [qw( /path/to/repo )]
     );
     $giita->app;
 

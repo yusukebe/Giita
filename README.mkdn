@@ -2,9 +2,9 @@
 
 ## DESCITPTION [これは何？]
 
-Yet another document viewer supports Perl code, POD, and git repository.
+Yet another dit repository document viewer supports Perl code, POD, and Markdown.
 
-Perlのコード, POD, gitレポジトリなどに対応したもう一つのドキュメントビューアー.
+Perlのコード, POD, Markdown などに対応したもう一つの git レポジトリドキュメントビューアー.
 
 Depends many CPAN modules.
 

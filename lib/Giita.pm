@@ -7,7 +7,6 @@ use Giita::Filter;
 use Giita::Git;
 use Text::MicroTemplate ();
 use Data::Section::Simple ();
-use Plack::Response;
 
 our $VERSION = '0.01';
 
@@ -115,10 +114,8 @@ sub make_response {
     my ( $self, $body ) = @_;
     my $head = $self->render('head.mt');
     my $foot = $self->render('foot.mt');
-    my $res  = res(200);
-    $res->body( $head . $body . $foot );
-    $res->content_type('text/html');
-    $res->finalize;
+    $body = $head . $body . $foot;
+    return [200,[ 'Content-Length' => length $body, 'Content-Type' => 'text/html'], [$body] ];
 }
 
 sub get_repo {

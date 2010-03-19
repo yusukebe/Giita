@@ -1,14 +1,34 @@
 package Giita;
 use strict;
 use warnings;
+use MojaMoja qw/render/;
+use Path::Class qw/file dir/;
+use Plack::Request;
+use Giita::Filter;
+use Giita::Git;
 
 our $VERSION = '0.01';
-our $rock = 1;
 
 sub new {
     my ( $class, %opt ) = @_;
-    my $self = bless {}, $class;
+    my $self = bless { name => $opt{name} || 'Repos' }, $class;
+    my $repos = $self->_init( $opt{repos} );
+    $self->{repos} = $repos;
+    $self->{filter} = Giita::Filter->new;
     $self;
+}
+
+sub _init {
+    my ( $self, $r ) = @_;
+    my $repos;
+    for ( @$r ) {
+        my $dir = dir( $_ );
+        next unless -d $dir->subdir('.git');
+        my @paths = split '/', $dir->absolute;
+        my $name = pop @paths;
+        push @$repos, { dir => $dir, name => $name };
+    }
+    return $repos;
 }
 
 sub app {
@@ -16,34 +36,66 @@ sub app {
     sub {
         my $env     = shift;
         my $req     = Plack::Request->new($env);
-        my $current = $req->path_info;
-        $current =~ s!^/!./!;
-
         my $base = $req->base;
 
-        if ( my $sha = $req->param('commit') ) {
-            my $git_commit = git_show($sha);
-            return make_response( render('commit.mt') );
+        if ( $req->path_info eq '/' ){
+            my @repos = @{ $self->{repos} };
+            return $self->make_response( render( 'index.mt') );
         }
 
-        if ( -d $current ) {
-            $current = dir($current);
-            my ( $children, $git_logs ) = get_dir($current);
-            return make_response( render('dir.mt') );
-        }
-
-        if ( -B $current ) {
-            my $body = file($current)->slurp;
-            return [ 200, [ 'Content-Length' => length $body ], [$body] ];
-        }
-
-        if ( -f $current ) {
-            $current = file($current);
-            my ( $content, $git_logs ) = get_file($current);
-            return make_response( render('file.mt') );
-        }
-        return [ 404, [], ['404 Document Not Found'] ];
+        my $current = $req->path_info;
+        my ($name) = $current =~ /^\/([^\/]+)/;
+        my $repo = $self->get_repo( $name ) or $self->handle_404;
+        $self->dispatch( $req, $repo );
+# TODO
+#         if ( my $sha = $req->param('commit') ) {
+#             my $git_commit = $self->git_show($sha);
+#             return $self->make_response( render('commit.mt') );
+#         }
     };
+}
+
+sub handle_404 {
+    return [ 404, [], ['404 Document Not Found'] ];
+}
+
+sub dispatch {
+    my ( $self, $req, $repo ) = @_;
+    my $base = $req->base;
+    my $path_info = $req->path_info || '';
+    $path_info =~ s!^/!!;
+    my $path_name = $path_info;
+    $path_name =~ s/$repo->{name}//;
+    my $current = $repo->{dir}->absolute . $path_name;
+    if ( -d $current ) {
+        $current = dir($current);
+        my ( $children, $git_logs ) = $self->get_dir($current);
+        my $links = $self->get_links( $path_info );
+        return $self->make_response( render('dir.mt') );
+    }
+    if ( -B $current ) {
+        my $body = file($current)->slurp;
+        return [ 200, [ 'Content-Length' => length $body ], [$body] ];
+    }
+    if ( -f $current ) {
+        $current = file($current);
+        my ( $content, $git_logs ) = $self->get_file($current);
+        my $links = $self->get_links( $path_info );
+        return $self->make_response( render('file.mt') );
+    }
+    return;
+}
+
+sub get_links {
+    my ( $self, $path_info ) = @_;
+    my @path = split '/', $path_info;
+    my (@l, $links);
+    for ( @path ){
+        push @l, $_;
+        my $href = join '/', @l;
+        push @$links, { href => $href , name => $_ }
+    }
+    return $links;
 }
 
 sub make_response {
@@ -56,12 +108,18 @@ sub make_response {
     $res->finalize;
 }
 
+sub get_repo {
+    my ( $self, $name ) = @_;
+    map { return $_ if $_->{name} eq $name } @{ $self->{repos} };
+    return;
+}
+
 sub get_dir {
     my ( $self, $path ) = @_;
     $path ||= dir('./');
     my @children = $path->children;
     if (wantarray) {
-        return ( \@children, git_log($path) );
+        return ( \@children, '' );
     }
     else {
         return \@children;
@@ -74,25 +132,25 @@ sub get_file {
     my $html;
     my ($ext) = $path->basename =~ /\.([^\.]+)$/;
     if ( $ext =~ /(?:pm|pl|psgi|pod|t)/i ) {
-        $html .= pod($text);
-        $html .= '<pre class="code">' . highlight($text) . '</pre>';
+        $html .= $self->{filter}->pod($text);
+        $html .= '<pre class="code">' . $self->{filter}->highlight($text) . '</pre>';
     }
     elsif ( $ext =~ /(?:md|mkdn)/i ) {
-        $html .= markdown($text);
-        $html .= '<pre>' . highlight($text) . '</pre>';
+        $html .= $self->{filter}->markdown($text);
+        $html .= '<pre>' . $self->{filter}->highlight($text) . '</pre>';
     }
     else {
-        $html = '<pre>' . highlight($text) . '</pre>';
+        $html = '<pre>' . $self->{filter}->highlight($text) . '</pre>';
     }
     if (wantarray) {
-        return ( $html, git_log($path) );
+        return ( $html, '' );
     }
     else {
         return $html;
     }
 }
 
-$Giita::rock;
+1;
 
 =head1 NAME
 
@@ -123,3 +181,84 @@ it under the same terms as Perl itself.
 
 =cut
 
+
+__DATA__
+
+@@ index.mt
+<h1>Repos</h1>
+<hr />
+
+? for my $repo ( @repos ) {
+<h2><a href="<?= $base ?><?= $repo->{name} ?>"><?= $repo->{name} ?></a></h2>
+? }
+
+
+@@ dir.mt
+<h1>
+<a href="<?= $base ?>">Repos</a> /
+? my $current_link = pop @$links;
+? for my $link ( @$links ){
+<a href="<?= $base ?><?= $link->{href} ?>"><?= $link->{name} ?></a> /
+? }
+<?= $current_link->{name} ?>
+</h1>
+<hr />
+<ul>
+? for my $child ( @$children ) {
+? my @child_path = split '/', $child->absolute;
+? my $child_name = pop @child_path;
+<li class="<? if ( $child->is_dir ) { ?>dir<? }else { ?>file<? } ?>"><a href="<?= $base ?><?= $path_info ?>/<?= $child_name ?>"><?= $child_name ?></a></li>
+? }
+</ul>
+<pre class="git">
+</pre>
+
+@@ file.mt
+? my @path = split '/', $path_info;
+? my $current_path = pop @path;
+? my @links;
+<h1>
+<a href="<?= $base ?>">Repos</a> /
+? my $current_link = pop @$links;
+? for my $link ( @$links ){
+<a href="<?= $base ?><?= $link->{href} ?>"><?= $link->{name} ?></a> /
+? }
+<?= $current_link->{name} ?>
+</h1>
+<hr />
+<div class="span-16">
+?= Text::MicroTemplate::encoded_string $content
+</div>
+<div class="span-8 last">
+<pre class="git" style="font-size:0.8em;">
+?= Text::MicroTemplate::encoded_string $git_logs
+</pre>
+</div>
+
+@@ commit.mt
+<h1><a href="<?= $base ?>"><?= $root_name ?></a> / <?= $sha ?></h1>
+<hr />
+<pre class="git">
+?= Text::MicroTemplate::encoded_string $git_commit
+</pre>
+
+@@ head.mt
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+</head>
+<title></title>
+<link rel="stylesheet" href="http://github.com/yusukebe/giita/raw/master/static/screen.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="http://github.com/yusukebe/giita/raw/master/static/site.css" type="text/css" />
+<link rel="stylesheet" href="http://github.com/yusukebe/giita/raw/master/static/print.css" type="text/css" media="print">
+<!--[if lt IE 8]><link rel="stylesheet" href="http://github.com/yusukebe/giita/raw/master/static/ie.css" type="text/css" media="screen, projection"><![endif]-->
+</head>
+<body>
+<div class="container">
+<hr class="space" />
+
+@@ foot.mt
+<hr >
+<address>giita - lightweigth rock band. <a href="http://github.com/yusukebe/giita">repository on github</a>.</address>
+</div>
+</body>
+</html>

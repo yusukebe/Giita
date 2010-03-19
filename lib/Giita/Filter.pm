@@ -1,4 +1,6 @@
 package Giita::Filter;
+use warnings;
+use strict;
 use Giita;
 use Text::VimColor;
 use Pod::Simple::XHTML;
